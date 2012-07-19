@@ -91,14 +91,41 @@ public class Main extends JavaPlugin{
     			
     		}
     		case "top":{
+    			if (args.length == 3){
+    				if (args[2].matches("^[0-9]+$") && args[3].matches("^[0-9]+$")) {
+    					if (Integer.getInteger(args[3]) < Integer.getInteger(args[2])) {
+    						player.sendMessage(colorize("&6Proper use&f: &3/tt top &f[&3minimum&f] [&3maximum&f]"));
+    						return true;
+    					}
+    					if (Integer.getInteger(args[3]) > 50 ||
+    							Integer.getInteger(args[2]) > 50) {
+    						player.sendMessage("You may not view the list past 50.");
+							
+    					}
+    					doTop(player, args[2], args[3]);
+    					return true;
+    				}else{
+    					player.sendMessage(colorize("&6Proper use&f: &3/tt top &f[&3minimum&f] [&3maximum&f]"));
+    					return true;
+    				}
+    			}
+    			if(args.length==2)
+    					if(args[2].matches("^[0-9]+$")){
+    						doTop(player,args[2]);
+    					}else{
+    						player.sendMessage(colorize("&6Proper use&f: &3/tt top &f[&3List Size&f]"));
+        					return true;
+    					}
     			doTop(player);
+    			return true;
     		}
     		case "check":{
     			doCheck(player, args[1].toLowerCase());
+    			return true;
     		}
     		case "clear":{
     			PEX.getUser(player.getName()).setSuffix(colorize("&f"), null);
-                
+    			return true;                
     		}
     		default:{
     			return doHelp(player);
@@ -109,6 +136,27 @@ public class Main extends JavaPlugin{
     }
     
     private void doTop(Player player) {
+    	int x=1;
+    	String[] splitter;
+    	
+    	
+    	player.sendMessage(colorize("&2Top &f5 &2Trophy Tag Owners&f:"));
+    	
+		while(x<=5){
+			splitter = config.getString("Top."+x).split("§§");
+			player.sendMessage(colorize("&f"+x+". &2"+ splitter[0] +" &f(&4"+splitter[1] + " Trophy Tags&f)"));
+	    }
+    	
+		
+		
+	}
+    
+    private void doTop(Player player, String amount) {
+		// TODO Auto-generated method stub
+		
+	}
+    
+    private void doTop(Player player, String min, String max) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -127,15 +175,29 @@ public class Main extends JavaPlugin{
     	doSorting(top);
     	plugin.saveConfig();
     }
-    
-    private void doSorting(List<String> top){
-    	Collections.sort(top, new Sorter());
-    }
-    
+        
     private void doUpdate(String player, int number){
+    	List<String> top = new ArrayList<String>();
+    	
+    	top = config.getStringList("Top");
+    	top.add( player.toLowerCase() + "§§" + SManager.getSuffixes(player).size());
+    	
     	config.set("Players." + player.toLowerCase() + ".Number", number);
+    	doSorting(top);
     	plugin.saveConfig();
     	
+    }
+    
+
+    private void doSorting(List<String> top){
+    	int x=1;
+    	
+    	Collections.sort(top, new Sorter());
+    	while(x<=top.size()){
+    		config.set("Top."+x,top.get(x-1));
+    		x++;
+    	}
+    	plugin.saveConfig();
     }
 
 	private void doCheck(Player player, String name) {
