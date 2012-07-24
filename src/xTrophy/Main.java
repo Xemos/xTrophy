@@ -88,7 +88,12 @@ public class Main extends JavaPlugin{
     			doList(player,  SManager.getSuffixes(player.getName()));
     		}
     		case "set":{
-    			
+    			if(args.length == 3){
+    				doSet(args[2], args[1], player, SManager.getSuffixes(player.getName()));
+    			} else {
+    				doSet(args[1], player, SManager.getSuffixes(player.getName()));
+    	    		
+    			}
     		}
     		case "top":{
     			if (args.length == 3){
@@ -135,7 +140,99 @@ public class Main extends JavaPlugin{
 		    
     }
     
-    private void doTop(Player player) {
+    // True = Color to & ~~ False = & to color
+    private String colorTest(String input, Boolean type){
+    	String output = null;
+    	
+    	if(type){
+    	switch(input.toLowerCase()){
+			case "black": output = "&0"; break;
+    		case "navy": output = "&1"; break;
+    		case "green": output = "&2"; break;
+    		case "teal": output = "&f3"; break;
+    		case "red": output = "&f4"; break;
+    		case "purple": output = "&f5"; break;
+    		case "gold": output = "&f6"; break;
+    		case "silver": output = "&f7"; break;
+    		case "grey": output = "&f8"; break;
+    		case "blue": output = "&f9"; break;
+    		case "lime": output = "&fa"; break;
+    		case "aqua": output = "&fb"; break;
+    		case "rose": output = "&fc"; break;
+    		case "pink": output = "&fd"; break;
+    		case "yellow": output = "&fe"; break;
+    		case "white": output = "&f"; break;
+     	}
+    	} else {
+     	switch(input.toLowerCase()){
+    		case "&0": output = "&0Black"; break;
+        	case "&1": output = "&1Navy"; break;
+        	case "&2": output = "&2Green"; break;
+        	case "&3": output = "&3Teal"; break;
+        	case "&4": output = "&4Red"; break;
+        	case "&5": output = "&5Purple"; break;
+        	case "&6": output = "&6Gold"; break;
+        	case "&7": output = "&7Silver"; break;
+        	case "&8": output = "&8Grey"; break;
+        	case "&9": output = "&9Blue"; break;
+        	case "&a": output = "&aLime"; break;
+        	case "&b": output = "&bAqua"; break;
+        	case "&c": output = "&cRose"; break;
+        	case "&d": output = "&dPink"; break;
+        	case "&e": output = "&eYellow"; break;
+        	case "&f": output = "&fWhite"; break;
+         	}
+     	}
+    	
+    	return output;
+    }
+    
+    
+    private void doSet(String color, String newTag, Player player, List<String> suffixes) {
+    	//TODO
+    
+    }
+    
+    private void doSet(String newTag, Player player, List<String> suffixes) {
+    	String[] cutter;
+    	String current = PEX.getUser(player).getSuffix();
+    	int loc;
+    	List<String> temp = new ArrayList<String>();
+    	
+    	for(String matches : suffixes){
+    		if(stripper(matches).toLowerCase() == newTag.toLowerCase()){
+    			temp.add(matches);
+    		} 
+    	}
+    	
+    	if(temp.size() == 0){
+    		player.sendMessage("You do not own the tag " + newTag + ". Type /TT Check to see what you own.");
+    		return;
+    	}
+    	    	   	
+    	if(temp.indexOf(current) == temp.size()-1){
+    		loc =0;
+      	} else {
+      		loc = temp.indexOf(current) + 1;
+      	}
+    	
+    	cutter = temp.get(loc).split("(&([a-f][A-F][0-9]))");
+		if(cutter.length > 2){
+			PEX.getUser(player).setSuffix(colorize(cutter[0]) + "[" + colorize(temp.get(loc).substring(2)) + colorize(cutter[0]) + "]" , null);    			
+		}else{
+			PEX.getUser(player).setSuffix(colorize(cutter[0]) + "[" + cutter[1] + "]" , null);
+		}
+		
+	}
+    
+    private String stripper(String strip){
+		String temp = "";
+			temp.replaceAll("(&([A-F][a-f][0-9]))", "").replaceAll("(§([A-F][a-f][0-9]))", "").replace("[", "").replace("]", "");
+    	return strip;
+    	
+    }
+
+	private void doTop(Player player) {
     	int x=1;
     	String[] splitter;
     	
@@ -175,18 +272,7 @@ public class Main extends JavaPlugin{
     	doSorting(top);
     	plugin.saveConfig();
     }
-        
-    private void doUpdate(String player, int number){
-    	List<String> top = new ArrayList<String>();
-    	
-    	top = config.getStringList("Top");
-    	top.add( player.toLowerCase() + "§§" + SManager.getSuffixes(player).size());
-    	
-    	config.set("Players." + player.toLowerCase() + ".Number", number);
-    	doSorting(top);
-    	plugin.saveConfig();
-    	
-    }
+   
     
 
     private void doSorting(List<String> top){
@@ -204,13 +290,12 @@ public class Main extends JavaPlugin{
     	String[] cutter;
     	String list = "";
     	List<String> tags = SManager.getSuffixes(name);
-    	doUpdate(name,tags.size());
     	for(String stripper: tags){
-    		cutter = stripper.split("(&([a-f0-9]))");
+    		cutter = stripper.split("(&([A-F][a-f][0-9]))");
     		if(cutter.length > 2){
-    			list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2)) + colorize(cutter[0]) + "]" + ", ");    			
+    			list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2)) + colorize(cutter[0]) + "]" + "&f, ");    			
     		}else{
-    			list.concat(colorize(cutter[0]) + "[" + cutter[1] + "]" + ", " );
+    			list.concat(colorize(cutter[0]) + "[" + cutter[1] + "] &f(" + colorTest(cutter[0],false) + "&f) , " );
     		}
     		
     	}
@@ -218,6 +303,7 @@ public class Main extends JavaPlugin{
     	
     	player.sendMessage("§6~~ Trophy Tags - Showing "+tags.size() + " tags for "+ name.replace(name.charAt(0), name.toUpperCase().charAt(0)) + " ~~");
     	player.sendMessage(list);
+    	doUpdate();
 	}
     
     private void doList(Player player, List<String> tags) {
@@ -233,10 +319,10 @@ public class Main extends JavaPlugin{
     		
     	}
     	list = list.substring(0, (list.length() - 2));
-    	doUpdate(player.getName(),tags.size());
     	
     	player.sendMessage("§6~~ Trophy Tags - " + tags.size() + " Tags Owned ~~");
     	player.sendMessage(list);
+    	doUpdate();
 	}
 
 	public static String colorize(String original)
@@ -263,8 +349,8 @@ public class Main extends JavaPlugin{
 
 		player.sendMessage(ChatColor.GOLD + "~~ Trophy Tags - Commands ~~");
         player.sendMessage(ChatColor.GREEN + "/TT List");
-        player.sendMessage(ChatColor.GREEN + "/TT Set [Tag]");
-        player.sendMessage(ChatColor.GREEN + "/TT Top");
+        player.sendMessage(ChatColor.GREEN + "/TT Set [Tag] // Set [Tag][Color]");
+        player.sendMessage(ChatColor.GREEN + "/TT Top // Top [Number] // Top [Min][Max]");
         player.sendMessage(ChatColor.GREEN + "/TT Check [PlayerName]");
         player.sendMessage(ChatColor.GREEN + "/TT Clear");
         return true;
