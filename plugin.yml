@@ -5,4 +5,4 @@ authors: [Xemos,happyG]
 commands:
   TT:
     description: TrophyTag command
-    usage: /TT
+    usage: /TT <command> 

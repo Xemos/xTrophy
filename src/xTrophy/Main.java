@@ -92,8 +92,7 @@ public class Main extends JavaPlugin{
     				doSet(args[2], args[1], player, SManager.getSuffixes(player.getName()));
     			} else {
     				doSet(args[1], player, SManager.getSuffixes(player.getName()));
-    	    		
-    			}
+    	    	}
     		}
     		case "top":{
     			if (args.length == 3){
