@@ -33,9 +33,16 @@ public class Main extends JavaPlugin{
 	private Main plugin;
 
 	public Main(Main main){
-		this.plugin = main;
-		this.config = plugin.getConfig();
+		super();
+		this.plugin = main;		
 	}
+	
+	 public void onEnable() {
+	        this.config = plugin.getConfig();
+	        setupPEX();
+	        doUpdate();
+	        log.info("[TrophyTags] Enabled");
+	    }
 
 	private FileConfiguration config = null;
 	public static final Logger log = Logger.getLogger("Minecraft");
@@ -46,11 +53,7 @@ public class Main extends JavaPlugin{
         log.info("[TrophyTags] Disabled");
     }
 
-    public void onEnable() {
-        setupPEX();
-        doUpdate();
-        log.info("[TrophyTags] Enabled");
-    }
+   
 
     
     public void setupPEX(){
