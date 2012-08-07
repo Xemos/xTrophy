@@ -1,6 +1,6 @@
 name: xTrophy
 main: xTrophy.Main
-version: 2.0
+version: 2.5
 authors: [Xemos,happyG]
 commands:
   TT:
