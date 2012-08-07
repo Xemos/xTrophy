@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
-
- */
 package xTrophy;
 
 
@@ -32,29 +27,23 @@ import xTrophy.Tools.Sorter;
 public class Main extends JavaPlugin{
 	private Main plugin;
 
-	public Main(Main main){
-		super();
-		this.plugin = main;		
-	}
-	
+		
 	 public void onEnable() {
+		  	plugin = this;
 	        this.config = plugin.getConfig();
 	        setupPEX();
 	        doUpdate();
 	        log.info("[TrophyTags] Enabled");
+	    }
+	 
+	 public void onDisable() {
+	        log.info("[TrophyTags] Disabled");
 	    }
 
 	private FileConfiguration config = null;
 	public static final Logger log = Logger.getLogger("Minecraft");
 	public static PermissionManager PEX;
 	public static HashMap<String, ChatColor> colors = new HashMap<String, ChatColor>();
-
-    public void onDisable() {
-        log.info("[TrophyTags] Disabled");
-    }
-
-   
-
     
     public void setupPEX(){
         Plugin p = getServer().getPluginManager().getPlugin("PermissionsEx");
@@ -65,14 +54,6 @@ public class Main extends JavaPlugin{
             this.setEnabled(false);
         }
     }
-    
-    /*
-                player.sendMessage(ChatColor.GREEN + "/TT List");
-                player.sendMessage(ChatColor.GREEN + "/TT Set [Tag] [Color]");
-                player.sendMessage(ChatColor.GREEN + "/TT Top");
-                player.sendMessage(ChatColor.GREEN + "/TT Check [PlayerName]");
-                player.sendMessage(ChatColor.GREEN + "/TT Clear");
-     */
     
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         
@@ -85,50 +66,82 @@ public class Main extends JavaPlugin{
 		
 		Player player = (Player) sender;
 		
+		if (args.length == 0) {
+			doHelp(player);
+			return true;
+		}
+		
     	
     	switch(args[0].toLowerCase()){
     		case "list":{
     			doList(player,  SManager.getSuffixes(player.getName()));
+    			return true;
     		}
     		case "set":{
     			if(args.length == 3){
     				doSet(args[2], args[1], player, SManager.getSuffixes(player.getName()));
-    			} else {
+    				return true;
+    			} else if(args.length ==2) {
     				doSet(args[1], player, SManager.getSuffixes(player.getName()));
+    				return true;
+    	    	} else {
+    	    		player.sendMessage(colorize("&6Proper use&f:"));
+    	    		player.sendMessage(colorize("&3/tt set &f[&3Tag Name&f] &f[&3Color&f] ~ &6Sets it to the matching color."));
+    	    		player.sendMessage(colorize("&3/tt set &f[&3Tag Name&f] ~ &6Scrolls through the matching tags."));
+    	    		return true;
     	    	}
     		}
     		case "top":{
     			if (args.length == 3){
-    				if (args[2].matches("^[0-9]+$") && args[3].matches("^[0-9]+$")) {
-    					if (Integer.getInteger(args[3]) < Integer.getInteger(args[2])) {
-    						player.sendMessage(colorize("&6Proper use&f: &3/tt top &f[&3minimum&f] [&3maximum&f]"));
+    				if (args[1].matches("^[0-9]+$") && args[2].matches("^[0-9]+$")) {
+    					if (Integer.parseInt(args[2]) < Integer.parseInt(args[1])) {
+    						player.sendMessage(colorize("&6Proper use&f:"));
+    						player.sendMessage(colorize("&3/tt top &f[&3minimum&f] [&3maximum&f]"));
     						return true;
     					}
-    					if (Integer.getInteger(args[3]) > 50 ||
-    							Integer.getInteger(args[2]) > 50) {
-    						player.sendMessage("You may not view the list past 50.");
-							
+    					if (Integer.parseInt(args[1]) > 50 ||
+    							Integer.parseInt(args[2]) > 50) {
+    						player.sendMessage(colorize("&3You may not view the list past 50."));
+    						return true;
     					}
-    					doTop(player, args[2], args[3]);
+    					doTop(player, Integer.parseInt(args[1]), Integer.parseInt(args[2]));
     					return true;
     				}else{
-    					player.sendMessage(colorize("&6Proper use&f: &3/tt top &f[&3minimum&f] [&3maximum&f]"));
+    					player.sendMessage(colorize("&6Proper use&f:"));
+						player.sendMessage(colorize("&3/tt top &f[&3minimum&f] [&3maximum&f]"));
     					return true;
     				}
     			}
     			if(args.length==2)
-    					if(args[2].matches("^[0-9]+$")){
-    						doTop(player,args[2]);
+    					if(args[1].matches("^[0-9]+$")){
+    						if (Integer.parseInt(args[1]) < 3) {
+        						player.sendMessage(colorize("&3You must view a list larger than 3."));
+        						return true;
+        					} 
+    						if (Integer.parseInt(args[1]) > 50) {
+        						player.sendMessage(colorize("&3You may not view the list past 50."));
+        						return true;
+        					} else {
+        						doTop(player, Integer.parseInt(args[1]));
+        						return true;
+        					}
     					}else{
-    						player.sendMessage(colorize("&6Proper use&f: &3/tt top &f[&3List Size&f]"));
-        					return true;
+    						player.sendMessage(colorize("&6Proper use&f:"));
+    						player.sendMessage(colorize("&3/tt top &f[&3List Size&f]"));
+    						return true;
     					}
     			doTop(player);
     			return true;
     		}
     		case "check":{
-    			doCheck(player, args[1].toLowerCase());
-    			return true;
+    			if(args.length == 2){
+    				doCheck(player, args[1].toLowerCase());
+    				return true;
+    			} else {
+    				player.sendMessage(colorize("&6Proper use&f:"));
+					player.sendMessage(colorize("&3/tt check &f[&3Player Name&f]"));
+    			}
+    			
     		}
     		case "clear":{
     			PEX.getUser(player.getName()).setSuffix(colorize("&f"), null);
@@ -191,48 +204,96 @@ public class Main extends JavaPlugin{
     
     
     private void doSet(String color, String newTag, Player player, List<String> suffixes) {
-    	//TODO
+    	String[] cutter;
+    	int loc = 0;
+    	List<String> temp = new ArrayList<String>();
+    	
+    	for(String matches : suffixes){
+    		if(stripper(matches).equalsIgnoreCase(newTag)){
+    		temp.add(matches);
+    		} 
+    	}
+    	
+    	if(temp.size() == 0){
+    		player.sendMessage("&6You do not own the Trophy Tag: " + newTag);
+    		return;
+    	}
+    	
+    	search : {
+    		for(String stripper: temp){
+    			cutter = stripper.split("(&([a-fA-F0-9]))");
+    			cutter[0] = stripper.substring(0, 2);
+    		    		
+     			if(cutter.length > 3){
+       				// not it because it is a multi, so skip it	
+        		}else if(cutter.length == 3){
+        			if(colorTest(stripper.substring(2, 4),false).substring(2).equalsIgnoreCase(color)){
+    					newTag = colorize(cutter[0] + "[" + temp.get(loc).substring(2) + cutter[0] + "]&f");
+    					break search;
+    				}
+        		}else{
+        			if(colorTest(stripper.substring(0, 2),false).substring(2).equalsIgnoreCase(color)){
+           				newTag = colorize(cutter[0] + "[" + cutter[1] + "]&f");
+        				break search;
+    				}
+           		}   
+    			loc++;
+    		}
+    	}
+    	
+    	config.set("Players." + player.getName() + ".Current",  temp.get(loc));
+    	PEX.getUser(player).setSuffix(newTag , null);
+		player.sendMessage("&6Your Trophy Tag is now set to: " + newTag);
+		plugin.saveConfig();
     
     }
     
     private void doSet(String newTag, Player player, List<String> suffixes) {
     	String[] cutter;
-    	String current = PEX.getUser(player).getSuffix();
+    	String current ="";
     	int loc;
     	List<String> temp = new ArrayList<String>();
     	
     	for(String matches : suffixes){
-    		if(stripper(matches).toLowerCase() == newTag.toLowerCase()){
-    			temp.add(matches);
+    		if(stripper(matches).equalsIgnoreCase(newTag)){
+    		temp.add(matches);
     		} 
     	}
     	
     	if(temp.size() == 0){
-    		player.sendMessage("You do not own the tag " + newTag + ". Type /TT Check to see what you own.");
+    		player.sendMessage("&6You do not own the Trophy Tag: " + newTag);
     		return;
     	}
-    	    	   	
-    	if(temp.indexOf(current) == temp.size()-1){
-    		loc =0;
-      	} else {
-      		loc = temp.indexOf(current) + 1;
-      	}
     	
-    	cutter = temp.get(loc).split("(&([a-f][A-F][0-9]))");
+    	if(config.contains("Players." + player.getName() + ".Current")){
+    		current = config.getString("Players." + player.getName() + ".Current");
+     		loc = temp.indexOf(current) +1;
+     		if(temp.size() == loc){
+     			loc = 0;
+     		}
+      	} else {
+       		loc = 0;
+      	}
+    	    
+    	config.set("Players." + player.getName() + ".Current",  temp.get(loc));
+    	
+    	cutter = temp.get(loc).split("(&([a-fA-F0-9]))");
+		cutter[0] = temp.get(loc).substring(0, 2);
+    	
 		if(cutter.length > 2){
-			PEX.getUser(player).setSuffix(colorize(cutter[0]) + "[" + colorize(temp.get(loc).substring(2)) + colorize(cutter[0]) + "]" , null);    			
+			newTag = colorize(cutter[0] + "[" + temp.get(loc).substring(2) + cutter[0] + "]&f");
 		}else{
-			PEX.getUser(player).setSuffix(colorize(cutter[0]) + "[" + cutter[1] + "]" , null);
+			newTag = colorize(cutter[0] + "[" + cutter[1] + "]&f");
 		}
 		
+		PEX.getUser(player).setSuffix(newTag , null);
+		player.sendMessage("&6Your Trophy Tag is now set to: " + newTag);
+		plugin.saveConfig();
 	}
     
     private String stripper(String strip){
-		String temp = "";
-			temp.replaceAll("(&([A-F][a-f][0-9]))", "").replaceAll("(§([A-F][a-f][0-9]))", "").replace("[", "").replace("]", "");
-    	return strip;
-    	
-    }
+    	return strip.replaceAll("(&([a-fA-F0-9]))", "");
+	}
 
 	private void doTop(Player player) {
     	int x=1;
@@ -244,19 +305,47 @@ public class Main extends JavaPlugin{
 		while(x<=5){
 			splitter = config.getString("Top."+x).split("§§");
 			player.sendMessage(colorize("&f"+x+". &2"+ splitter[0] +" &f(&4"+splitter[1] + " Trophy Tags&f)"));
+			x++;
 	    }
     	
 		
 		
 	}
     
-    private void doTop(Player player, String amount) {
-		// TODO Auto-generated method stub
+    private void doTop(Player player, Integer amount) {
+    	int x=1;
+    	String[] splitter;
+    	
+    	if(!config.contains("Top." + amount)){
+    		player.sendMessage(colorize("&2There are not " + amount + " Trophy Tag holders&f:"));
+    		return;
+    	}
+    	
+    	player.sendMessage(colorize("&2Top &f" + amount + " &2Trophy Tag Owners&f:"));
+    	
+		while(x<=amount){
+			splitter = config.getString("Top."+x).split("§§");
+			player.sendMessage(colorize("&f"+x+". &2"+ splitter[0] +" &f(&4"+splitter[1] + " Trophy Tags&f)"));
+			x++;
+	    }
 		
 	}
     
-    private void doTop(Player player, String min, String max) {
-		// TODO Auto-generated method stub
+    private void doTop(Player player, Integer min, Integer max) {
+    	String[] splitter;
+    	
+    	if(!config.contains("Top." + max)){
+    		player.sendMessage(colorize("&2There are not " + max + " Trophy Tag holders&f:"));
+    		return;
+    	}
+    	
+    	player.sendMessage(colorize("&2Showing top Trophy Tag Owners between &f " + min + " and " + max + "&f:"));
+    	
+		while(min<=max){
+			splitter = config.getString("Top."+min).split("§§");
+			player.sendMessage(colorize("&f"+min+". &2"+ splitter[0] +" &f(&4"+splitter[1] + " Trophy Tags&f)"));
+			min++;
+	    }
 		
 	}
     
@@ -266,7 +355,7 @@ public class Main extends JavaPlugin{
     	List<String> top = new ArrayList<String>();
     	
     	for(PermissionUser user : PEX.getUsers()){
-        	top.add(x, user.getName().toLowerCase() + "§§" + SManager.getSuffixes(user.getName()).size());
+        	top.add(x, user.getName() + "§§" + SManager.getSuffixes(user.getName()).size());
         	splitter = top.get(x).split("(§§)");
         	config.set("Players." + splitter[0] + ".Number" , splitter[1]);
        	}
@@ -292,15 +381,30 @@ public class Main extends JavaPlugin{
     	String[] cutter;
     	String list = "";
     	List<String> tags = SManager.getSuffixes(name);
-    	for(String stripper: tags){
-    		cutter = stripper.split("(&([A-F][a-f][0-9]))");
-    		if(cutter.length > 2){
-    			list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2)) + colorize(cutter[0]) + "]" + "&f, ");    			
-    		}else{
-    			list.concat(colorize(cutter[0]) + "[" + cutter[1] + "] &f(" + colorTest(cutter[0],false) + "&f) , " );
-    		}
-    		
+    	
+    	if(!SManager.getPermissionStrings(name).contains("whosthere.who")){
+    		player.sendMessage("§6The player " + name + " does not exist!");
+    		return;
     	}
+    	
+    	if(tags.size()==0){
+    		player.sendMessage("§6" + name + " does not own and Trophy Tags.");
+    		return;
+    	}
+    	
+    	for(String stripper: tags){
+    		cutter = stripper.split("(&([a-fA-F0-9]))");
+    		cutter[0] = stripper.substring(0, 2);
+    		
+    		if(cutter.length > 3){
+   				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" + "&f, ");    			
+    		}else if(cutter.length == 3){
+				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" +  "&f, ");    			
+    		}else{
+   				list = list.concat(colorize(cutter[0]) + "[" + cutter[1].toUpperCase() + "]" +  "&f, " );
+    		}
+    	}
+    		
     	list = list.substring(0, (list.length() - 2));
     	
     	player.sendMessage("§6~~ Trophy Tags - Showing "+tags.size() + " tags for "+ name.replace(name.charAt(0), name.toUpperCase().charAt(0)) + " ~~");
@@ -311,15 +415,25 @@ public class Main extends JavaPlugin{
     private void doList(Player player, List<String> tags) {
     	String[] cutter;
     	String list = "";
-    	for(String stripper: tags){
-    		cutter = stripper.split("(&([a-f0-9]))");
-    		if(cutter.length >= 2){
-    				list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2)) + colorize(cutter[0]) + "]" + ", ");    			
-        		}else{
-        			list.concat(colorize(cutter[0]) + "[" + cutter[1] + "]" + ", " );
-        		}
-    		
+    	
+    	if(tags.size()==0){ 
+    		player.sendMessage("§6You do not own any Trophy Tags."); 
+    		return;
     	}
+    	
+    	for(String stripper: tags){
+    		cutter = stripper.split("(&([a-fA-F0-9]))");
+    		cutter[0] = stripper.substring(0, 2);
+    	    		
+    		if(cutter.length > 3){
+   				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" + "&f, ");    			
+    		}else if(cutter.length == 3){
+				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" + "&f (" + colorTest(stripper.substring(2, 4),false) +  "&f), ");    			
+    		}else{
+   				list = list.concat(colorize(cutter[0]) + "[" + cutter[1].toUpperCase() + "]" + "&f (" + colorTest(cutter[0],false) +  "&f), " );
+       		}    		
+    	}
+    	
     	list = list.substring(0, (list.length() - 2));
     	
     	player.sendMessage("§6~~ Trophy Tags - " + tags.size() + " Tags Owned ~~");
