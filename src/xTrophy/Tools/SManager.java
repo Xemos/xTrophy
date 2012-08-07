@@ -28,12 +28,12 @@ public class SManager {
         return suffixes;
     }
 
-    private static List<String> getPermissionStrings(String playerName){
+    public static List<String> getPermissionStrings(String playerName){
         String[] aPerms = Main.PEX.getUser(playerName).getPermissions("world");
         List<String> permissions = new ArrayList<String>();
         for(String s : aPerms){
-            if(!permissions.contains(s.toLowerCase())){
-                permissions.add(s.toLowerCase());
+            if(!permissions.contains(s)){
+                permissions.add(s);
             }
         }
         return permissions;
