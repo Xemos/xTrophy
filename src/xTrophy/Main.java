@@ -164,18 +164,18 @@ public class Main extends JavaPlugin{
 			case "black": output = "&0"; break;
     		case "navy": output = "&1"; break;
     		case "green": output = "&2"; break;
-    		case "teal": output = "&f3"; break;
-    		case "red": output = "&f4"; break;
-    		case "purple": output = "&f5"; break;
-    		case "gold": output = "&f6"; break;
-    		case "silver": output = "&f7"; break;
-    		case "grey": output = "&f8"; break;
-    		case "blue": output = "&f9"; break;
-    		case "lime": output = "&fa"; break;
-    		case "aqua": output = "&fb"; break;
-    		case "rose": output = "&fc"; break;
-    		case "pink": output = "&fd"; break;
-    		case "yellow": output = "&fe"; break;
+    		case "teal": output = "&3"; break;
+    		case "red": output = "&4"; break;
+    		case "purple": output = "&5"; break;
+    		case "gold": output = "&6"; break;
+    		case "silver": output = "&7"; break;
+    		case "grey": output = "&8"; break;
+    		case "blue": output = "&9"; break;
+    		case "lime": output = "&a"; break;
+    		case "aqua": output = "&b"; break;
+    		case "rose": output = "&c"; break;
+    		case "pink": output = "&d"; break;
+    		case "yellow": output = "&e"; break;
     		case "white": output = "&f"; break;
      	}
     	} else {
@@ -243,7 +243,7 @@ public class Main extends JavaPlugin{
     	
     	config.set("Players." + player.getName() + ".Current",  temp.get(loc));
     	PEX.getUser(player).setSuffix(newTag , null);
-		player.sendMessage("&6Your Trophy Tag is now set to: " + newTag);
+		player.sendMessage(colorize("&6Your Trophy Tag is now set to: " + newTag));
 		plugin.saveConfig();
     
     }
@@ -287,7 +287,7 @@ public class Main extends JavaPlugin{
 		}
 		
 		PEX.getUser(player).setSuffix(newTag , null);
-		player.sendMessage("&6Your Trophy Tag is now set to: " + newTag);
+		player.sendMessage(colorize("&6Your Trophy Tag is now set to: " + newTag));
 		plugin.saveConfig();
 	}
     
@@ -397,11 +397,11 @@ public class Main extends JavaPlugin{
     		cutter[0] = stripper.substring(0, 2);
     		
     		if(cutter.length > 3){
-   				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" + "&f, ");    			
+   				list = list.concat(colorize(cutter[0] + "[" + stripper.substring(2).toUpperCase() + cutter[0] + "]" + "&f, "));    			
     		}else if(cutter.length == 3){
-				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" +  "&f, ");    			
+				list = list.concat(colorize(cutter[0] + "[" + stripper.substring(2).toUpperCase() + cutter[0] + "]" +  "&f, "));    			
     		}else{
-   				list = list.concat(colorize(cutter[0]) + "[" + cutter[1].toUpperCase() + "]" +  "&f, " );
+   				list = list.concat(colorize(cutter[0] + "[" + cutter[1].toUpperCase() + "]" +  "&f, " ));
     		}
     	}
     		
@@ -426,11 +426,11 @@ public class Main extends JavaPlugin{
     		cutter[0] = stripper.substring(0, 2);
     	    		
     		if(cutter.length > 3){
-   				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" + "&f, ");    			
+   				list = list.concat(colorize(cutter[0] + "[" + colorize(stripper.substring(2).toUpperCase()) + cutter[0] + "]" + "&f, "));    			
     		}else if(cutter.length == 3){
-				list = list.concat(colorize(cutter[0]) + "[" + colorize(stripper.substring(2).toUpperCase()) + colorize(cutter[0]) + "]" + "&f (" + colorTest(stripper.substring(2, 4),false) +  "&f), ");    			
+				list = list.concat(colorize(cutter[0] + "[" + colorize(stripper.substring(2).toUpperCase()) + cutter[0] + "]" + "&f (" + colorTest(stripper.substring(2, 4),false) +  "&f), "));    			
     		}else{
-   				list = list.concat(colorize(cutter[0]) + "[" + cutter[1].toUpperCase() + "]" + "&f (" + colorTest(cutter[0],false) +  "&f), " );
+   				list = list.concat(colorize(cutter[0] + "[" + cutter[1].toUpperCase() + "]" + "&f (" + colorTest(cutter[0],false) +  "&f), " ));
        		}    		
     	}
     	
